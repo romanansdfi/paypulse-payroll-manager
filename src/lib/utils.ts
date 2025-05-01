@@ -25,3 +25,7 @@ export function calculateTax(salary: number): number {
     return 19000 + (salary - 100000) * 0.3; // 30% tax rate on amount over 100000
   }
 }
+
+// Fix for issues with React UMD global references in TypeScript modules
+export { ensureReactImport, formatDate } from '@/utils/componentHelpers';
+
