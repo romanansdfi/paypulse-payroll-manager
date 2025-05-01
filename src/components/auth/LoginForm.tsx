@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { mockUsers } from "@/data/mockData";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -38,6 +39,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -69,25 +71,33 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
             navigate("/");
           }
         }, 1000);
+      } else if (user) {
+        // User exists but password is wrong
+        throw new Error("Incorrect password");
       } else {
-        throw new Error("Invalid email or password");
+        // User not found
+        throw new Error("User not found");
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: error.message || "Invalid email or password. Please try again.",
         variant: "destructive",
       });
       setIsLoading(false);
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto shadow-lg border-payroll-200">
       <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
-          Sign in to your PayPulse account
+        <CardTitle className="text-2xl text-center">Sign In</CardTitle>
+        <CardDescription className="text-center">
+          Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -103,6 +113,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
                     <Input
                       type="email"
                       placeholder="your.email@company.com"
+                      className="bg-white"
                       {...field}
                     />
                   </FormControl>
@@ -117,24 +128,56 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        className="bg-white pr-10"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"
+                      >
+                        {showPassword ? 
+                          <EyeOff className="h-4 w-4" /> : 
+                          <Eye className="h-4 w-4" />
+                        }
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <div className="flex justify-end">
+              <Link 
+                to="/forgot-password"
+                className="text-sm font-medium text-payroll-600 hover:text-payroll-700 hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full flex items-center justify-center gap-2" 
+              disabled={isLoading}
+            >
+              <LogIn className="h-4 w-4" />
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-center border-t pt-4">
-        <div className="text-sm text-muted-foreground text-center">
+      <CardFooter className="flex flex-col border-t pt-6">
+        <p className="text-sm text-muted-foreground mb-4 text-center">
+          Don't have an account?{" "}
+          <Link to="/signup" className="font-medium text-payroll-600 hover:text-payroll-700 hover:underline">
+            Create Account
+          </Link>
+        </p>
+        <div className="text-xs text-muted-foreground text-center">
           <p>Demo credentials:</p>
           <p>Admin: admin@paypulse.com / password</p>
           <p>Employee: john.doe@company.com / password</p>

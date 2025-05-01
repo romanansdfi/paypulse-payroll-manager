@@ -11,6 +11,8 @@ import PayrollPage from "./pages/PayrollPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
 import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +25,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/" element={<Layout><Dashboard /></Layout>} />
           <Route path="/employees" element={<Layout><EmployeesPage /></Layout>} />
           <Route path="/payroll" element={<Layout><PayrollPage /></Layout>} />

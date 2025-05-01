@@ -1,11 +1,11 @@
 
 import { useNavigate } from "react-router-dom";
-import LoginForm from "@/components/auth/LoginForm";
+import SignupForm from "@/components/auth/SignupForm";
 
-const LoginPage = () => {
+const SignupPage = () => {
   const navigate = useNavigate();
 
-  const handleLoginSuccess = () => {
+  const handleSignupSuccess = () => {
     navigate("/");
   };
 
@@ -18,9 +18,9 @@ const LoginPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-payroll-700 mb-4">PayPulse</h1>
             <div className="h-1 w-20 bg-payroll-500 mx-auto md:mx-0"></div>
           </div>
-          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-payroll-800">Welcome Back!</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-payroll-800">Join PayPulse</h2>
           <p className="text-payroll-600 mb-6">
-            Log in to access the PayPulse Payroll Management System and manage your organization's financial operations efficiently.
+            Create an account to access the PayPulse Payroll Management System and streamline your organization's financial operations.
           </p>
           <div className="hidden md:block">
             <img 
@@ -32,12 +32,12 @@ const LoginPage = () => {
         </div>
       </div>
       
-      {/* Right panel - login form */}
+      {/* Right panel - signup form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6">
-        <LoginForm onSuccess={handleLoginSuccess} />
+        <SignupForm onSuccess={handleSignupSuccess} />
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default SignupPage;
