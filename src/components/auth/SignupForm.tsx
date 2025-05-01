@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
-import OTPVerification from "./OTPVerification";
 
+// Define our schema for signup
 const signupSchema = z.object({
   name: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -44,11 +44,8 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [showOTP, setShowOTP] = useState(false);
-  const [generatedOtp, setGeneratedOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState<z.infer<typeof signupSchema> | null>(null);
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -64,78 +61,46 @@ const SignupForm = ({ onSuccess }: SignupFormProps) => {
     setIsLoading(true);
 
     try {
-      // Generate a random 6-digit OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedOtp(otp);
+      // Get existing users or initialize empty array
+      const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
       
-      // Store form data for later use after OTP verification
-      setFormData(values);
+      // Check if user already exists
+      const userExists = existingUsers.some((user: any) => user.email === values.email);
+      if (userExists) {
+        throw new Error("User with this email already exists");
+      }
       
-      // Show OTP verification screen
-      setShowOTP(true);
+      // Create new user object
+      const newUser = {
+        id: Date.now().toString(),
+        name: values.name,
+        email: values.email,
+        password: values.password, // In a real app, you would hash this
+      };
       
-      // Simulate sending OTP via email or SMS
-      toast({
-        title: "OTP Sent",
-        description: `A verification code has been sent to ${values.email}. Please check and enter the code.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Signup failed",
-        description: "An error occurred while processing your request. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = (enteredOTP: string) => {
-    if (enteredOTP === generatedOtp) {
-      // OTP is correct, complete the signup
+      // Save to localStorage (simulating database)
+      localStorage.setItem("users", JSON.stringify([...existingUsers, newUser]));
+      
+      // Show success toast
       toast({
         title: "Account created successfully!",
         description: "Your account has been created and you can now login.",
       });
       
-      // Navigate to login page
+      // Reset form and redirect to login page
       setTimeout(() => {
+        setIsLoading(false);
         navigate("/login");
       }, 1500);
-    } else {
-      // OTP is incorrect
+    } catch (error: any) {
       toast({
-        title: "Invalid OTP",
-        description: "The verification code you entered is incorrect. Please try again.",
+        title: "Sign up failed",
+        description: error.message || "An error occurred while creating your account",
         variant: "destructive",
       });
+      setIsLoading(false);
     }
   };
-  
-  const handleResendOTP = () => {
-    // Generate a new OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(otp);
-    
-    // Simulate sending OTP via email or SMS
-    toast({
-      title: "OTP Resent",
-      description: `A new verification code has been sent to ${formData?.email}.`,
-    });
-    
-    // In a real app, you would call an API to send the OTP
-    console.log("New OTP:", otp);
-  };
-
-  if (showOTP) {
-    return (
-      <OTPVerification 
-        onVerify={handleVerifyOTP}
-        onResend={handleResendOTP}
-        email={formData?.email || ""}
-      />
-    );
-  }
 
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border-payroll-200">

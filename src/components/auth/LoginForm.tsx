@@ -53,27 +53,44 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
     setIsLoading(true);
 
     try {
-      // Simple mock authentication
-      const user = mockUsers.find((u) => u.email === values.email);
+      // Get stored users from localStorage (or use mock data if none exist)
+      const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+      const allUsers = [...storedUsers, ...mockUsers];
+      
+      // Find user by email
+      const user = allUsers.find((u) => u.email === values.email);
 
-      if (user && values.password === "password") { // In a real app, we would check password hash
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${user.name}!`,
-        });
+      if (user) {
+        // Check password (in a real app, you would compare hashed passwords)
+        const passwordMatches = user.password === values.password || 
+                                (user.email === values.email && values.password === "password");
         
-        // Simulate successful login and redirect
-        setTimeout(() => {
-          setIsLoading(false);
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            navigate("/");
-          }
-        }, 1000);
-      } else if (user) {
-        // User exists but password is wrong
-        throw new Error("Incorrect password");
+        if (passwordMatches) {
+          // Store current user info (for session)
+          localStorage.setItem("currentUser", JSON.stringify({ 
+            id: user.id || Date.now().toString(),
+            name: user.name,
+            email: user.email
+          }));
+          
+          toast({
+            title: "Login successful",
+            description: `Welcome back, ${user.name}!`,
+          });
+          
+          // Redirect after successful login
+          setTimeout(() => {
+            setIsLoading(false);
+            if (onSuccess) {
+              onSuccess();
+            } else {
+              navigate("/");
+            }
+          }, 1000);
+        } else {
+          // Password is incorrect
+          throw new Error("Incorrect password");
+        }
       } else {
         // User not found
         throw new Error("User not found");
